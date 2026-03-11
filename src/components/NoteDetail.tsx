@@ -27,13 +27,17 @@ const defaultSummary = {
   ],
 };
 
-const NoteDetail = ({ note, onBack, isSummarized = false }: NoteDetailProps) => {
+const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo }: NoteDetailProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [activeTab, setActiveTab] = useState<"transcript" | "summary">(
     isSummarized ? "summary" : "transcript"
   );
+  const [activeSegmentIndex, setActiveSegmentIndex] = useState<number | null>(null);
+
+  // Swipe gesture
+  const dragX = useMotionValue(0);
 
   // Editable summary state
   const [overview, setOverview] = useState(defaultSummary.overview);

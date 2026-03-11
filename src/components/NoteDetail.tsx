@@ -182,31 +182,35 @@ const NoteDetail = ({ note, onBack, isSummarized = false }: NoteDetailProps) => 
         </div>
       </div>
 
-      {/* Tab switcher */}
+      {/* Swipeable tab switcher */}
       {isSummarized && (
-        <div className="flex items-center gap-1 px-4 pb-2 shrink-0">
-          <button
-            onClick={() => setActiveTab("summary")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-              activeTab === "summary"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted/50 text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Sparkles className="w-3 h-3" />
-            Summary
-          </button>
-          <button
-            onClick={() => setActiveTab("transcript")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-              activeTab === "transcript"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted/50 text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <MessageSquareText className="w-3 h-3" />
-            Transcript
-          </button>
+        <div className="px-4 pb-2 shrink-0">
+          <div className="relative flex items-center bg-muted/40 rounded-full p-0.5">
+            <motion.div
+              className="absolute top-0.5 bottom-0.5 rounded-full bg-primary"
+              animate={{ x: activeTab === "summary" ? 0 : "100%" }}
+              style={{ width: "calc(50% - 2px)", left: 2 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            />
+            <button
+              onClick={() => setActiveTab("summary")}
+              className={`relative z-10 flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                activeTab === "summary" ? "text-primary-foreground" : "text-muted-foreground"
+              }`}
+            >
+              <Sparkles className="w-3 h-3" />
+              Summary
+            </button>
+            <button
+              onClick={() => setActiveTab("transcript")}
+              className={`relative z-10 flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                activeTab === "transcript" ? "text-primary-foreground" : "text-muted-foreground"
+              }`}
+            >
+              <MessageSquareText className="w-3 h-3" />
+              Transcript
+            </button>
+          </div>
         </div>
       )}
 

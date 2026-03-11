@@ -95,6 +95,7 @@ const SwipeableNoteCard = ({
   onOpen: (note: VoiceNote) => void;
   summaryState: "idle" | "loading" | "done";
   onSummarize: (id: string) => void;
+  onCopy: (id: string) => void;
 }) => {
   const x = useMotionValue(0);
   const deleteOpacity = useTransform(x, [-100, -60, 0], [1, 0.8, 0]);

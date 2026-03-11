@@ -280,8 +280,21 @@ const VoiceNotesList = () => {
     setNotes((prev) => prev.filter((n) => n.id !== id));
   };
 
+  const handleCopy = useCallback((id: string) => {
+    const note = notes.find((n) => n.id === id);
+    if (note) {
+      navigator.clipboard.writeText(note.transcript);
+    }
+  }, [notes]);
+
   if (selectedNote) {
-    return <NoteDetail note={selectedNote} onBack={() => setSelectedNote(null)} />;
+    return (
+      <NoteDetail
+        note={selectedNote}
+        onBack={() => setSelectedNote(null)}
+        isSummarized={summaryStates[selectedNote.id] === "done"}
+      />
+    );
   }
 
   return (

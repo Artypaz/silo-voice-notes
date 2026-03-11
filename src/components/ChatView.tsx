@@ -170,14 +170,26 @@ const ChatView = () => {
         <div className="glass-strong rounded-2xl flex items-center gap-2 px-3 py-2">
           <input
             type="text"
-            placeholder="Ask about your notes..."
+            placeholder={isListening ? "Listening..." : "Ask about your notes..."}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
           />
           <button
-            onClick={() => handleSend()}
+            onClick={toggleListening}
+            className={`p-2 rounded-full transition-colors ${
+              isListening ? "bg-destructive" : "hover:bg-muted/50"
+            }`}
+          >
+            {isListening ? (
+              <MicOff className="w-3.5 h-3.5 text-destructive-foreground" />
+            ) : (
+              <Mic className="w-3.5 h-3.5 text-muted-foreground" />
+            )}
+          </button>
+          <button
+            onClick={() => { stopListening(); handleSend(); }}
             disabled={!input.trim()}
             className="p-2 rounded-full bg-primary disabled:opacity-30 transition-opacity"
           >

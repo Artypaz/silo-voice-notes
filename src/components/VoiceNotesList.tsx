@@ -263,6 +263,7 @@ const VoiceNotesList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [notes, setNotes] = useState(mockNotes);
   const [selectedNote, setSelectedNote] = useState<VoiceNote | null>(null);
+  const [openOnSummary, setOpenOnSummary] = useState(false);
   const [summaryStates, setSummaryStates] = useState<Record<string, "idle" | "loading" | "done">>(() => {
     const initial: Record<string, "idle" | "loading" | "done"> = {};
     mockNotes.forEach((n) => {

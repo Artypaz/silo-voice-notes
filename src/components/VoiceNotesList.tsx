@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { Play, Pause, MoreHorizontal, Sparkles, Search, Trash2, Loader2, Copy, Star, Pencil, Share, RefreshCw, CheckCircle2 } from "lucide-react";
 import NoteDetail from "./NoteDetail";
@@ -9,6 +9,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getAllNotes, deleteNote as deleteStoredNote, seedIfEmpty, type StoredNote } from "@/services/storageService";
+import { summarizeTranscript } from "@/services/aiService";
+import { toast } from "sonner";
 
 export interface VoiceNote {
   id: string;
@@ -21,61 +24,20 @@ export interface VoiceNote {
   segments?: { time: string; text: string }[];
 }
 
-const mockNotes: VoiceNote[] = [
-  {
-    id: "1",
-    title: "Morning Reflection",
-    date: "2025-03-11",
-    time: "14:32",
-    transcript:
-      "You are only here for a short visit. Don't hurry, don't worry, and be sure to smell the flowers along the way.",
-    duration: "00:10",
-    hasSummary: true,
-    segments: [
-      { time: "0:00", text: "You are only here for a short visit." },
-      { time: "0:04", text: "Don't hurry, don't worry, and be sure to smell the flowers along the way." },
-    ],
-  },
-  {
-    id: "2",
-    date: "2025-03-11",
-    time: "12:15",
-    transcript:
-      "I use this app every day to capture voice memos and quick thoughts while walking. It's become an essential part of my workflow.",
-    duration: "00:23",
-    hasSummary: true,
-    segments: [
-      { time: "0:00", text: "I use this app every day to capture voice memos and quick thoughts while walking." },
-      { time: "0:12", text: "It's become an essential part of my workflow." },
-    ],
-  },
-  {
-    id: "3",
-    date: "2025-03-10",
-    time: "18:27",
-    transcript:
-      "Winter is coming and we need to prepare for it. We can start by gathering supplies and reinforcing the walls of the dead garden.",
-    duration: "00:15",
-    hasSummary: false,
-    segments: [
-      { time: "0:00", text: "Winter is coming and we need to prepare for it." },
-      { time: "0:06", text: "We can start by gathering supplies and reinforcing the walls of the dead garden." },
-    ],
-  },
-  {
-    id: "4",
-    date: "2025-03-10",
-    time: "09:44",
-    transcript:
-      "Meeting notes: discussed the new product launch timeline. Need to finalize designs by Friday and send to manufacturing by end of month.",
-    duration: "00:42",
-    hasSummary: true,
-    segments: [
-      { time: "0:00", text: "Meeting notes: discussed the new product launch timeline." },
-      { time: "0:15", text: "Need to finalize designs by Friday and send to manufacturing by end of month." },
-    ],
-  },
-];
+/** Convert a StoredNote to the UI VoiceNote shape */
+function toVoiceNote(s: StoredNote): VoiceNote {
+  const d = new Date(s.timestamp);
+  return {
+    id: s.id,
+    title: s.title,
+    date: d.toISOString().split("T")[0],
+    time: d.toTimeString().slice(0, 5),
+    transcript: s.rawTranscript,
+    duration: s.duration || "00:00",
+    hasSummary: !!s.aiSummary,
+    segments: s.segments || [{ time: "0:00", text: s.rawTranscript }],
+  };
+}
 
 const DELETE_THRESHOLD = -80;
 
@@ -108,7 +70,6 @@ const SwipeableNoteCard = ({
 
   const handleDragEnd = (_: any, info: PanInfo) => {
     if (info.offset.x < DELETE_THRESHOLD) {
-      // Snap to show delete
       x.set(-90);
     } else {
       x.set(0);
@@ -265,32 +226,56 @@ const SwipeableNoteCard = ({
   );
 };
 
-const VoiceNotesList = () => {
+interface VoiceNotesListProps {
+  refreshKey?: number;
+}
+
+const VoiceNotesList = ({ refreshKey }: VoiceNotesListProps) => {
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [notes, setNotes] = useState(mockNotes);
+  const [notes, setNotes] = useState<VoiceNote[]>([]);
   const [selectedNote, setSelectedNote] = useState<VoiceNote | null>(null);
   const [openOnSummary, setOpenOnSummary] = useState(false);
-  const [summaryStates, setSummaryStates] = useState<Record<string, "idle" | "loading" | "done">>(() => {
-    const initial: Record<string, "idle" | "loading" | "done"> = {};
-    mockNotes.forEach((n) => {
-      initial[n.id] = n.hasSummary ? "done" : "idle";
-    });
-    return initial;
-  });
+  const [summaryStates, setSummaryStates] = useState<Record<string, "idle" | "loading" | "done">>({});
 
-  const handleSummarize = useCallback((id: string) => {
-    setSummaryStates((prev) => ({ ...prev, [id]: "loading" }));
-    setTimeout(() => {
-      setSummaryStates((prev) => ({ ...prev, [id]: "done" }));
-    }, 2200);
+  // Load notes from localStorage
+  const loadNotes = useCallback(() => {
+    seedIfEmpty();
+    const stored = getAllNotes();
+    const voiceNotes = stored.map(toVoiceNote);
+    setNotes(voiceNotes);
+
+    const states: Record<string, "idle" | "loading" | "done"> = {};
+    stored.forEach((n) => {
+      states[n.id] = n.aiSummary ? "done" : "idle";
+    });
+    setSummaryStates(states);
   }, []);
+
+  useEffect(() => {
+    loadNotes();
+  }, [loadNotes, refreshKey]);
+
+  const handleSummarize = useCallback(async (id: string) => {
+    setSummaryStates((prev) => ({ ...prev, [id]: "loading" }));
+    const note = notes.find((n) => n.id === id);
+    if (note) {
+      try {
+        await summarizeTranscript(note.transcript);
+        setSummaryStates((prev) => ({ ...prev, [id]: "done" }));
+      } catch {
+        setSummaryStates((prev) => ({ ...prev, [id]: "idle" }));
+        toast.error("Failed to summarize");
+      }
+    }
+  }, [notes]);
 
   const filteredNotes = notes.filter((n) =>
     n.transcript.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleDelete = (id: string) => {
+    deleteStoredNote(id);
     setNotes((prev) => prev.filter((n) => n.id !== id));
   };
 
@@ -298,6 +283,7 @@ const VoiceNotesList = () => {
     const note = notes.find((n) => n.id === id);
     if (note) {
       navigator.clipboard.writeText(note.transcript);
+      toast.success("Copied to clipboard");
     }
   }, [notes]);
 
@@ -344,21 +330,28 @@ const VoiceNotesList = () => {
 
       {/* Notes list */}
       <div className="flex-1 overflow-y-auto space-y-2.5 pb-2 scrollbar-none">
-        {filteredNotes.map((note, index) => (
-          <SwipeableNoteCard
-            key={note.id}
-            note={note}
-            index={index}
-            playingId={playingId}
-            onTogglePlay={(id) => setPlayingId(playingId === id ? null : id)}
-            onDelete={handleDelete}
-            onOpen={handleOpen}
-            onOpenSummary={handleOpenSummary}
-            summaryState={summaryStates[note.id] || "idle"}
-            onSummarize={handleSummarize}
-            onCopy={handleCopy}
-          />
-        ))}
+        {filteredNotes.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+            <p className="text-sm">No notes yet</p>
+            <p className="text-xs mt-1">Record your first voice note!</p>
+          </div>
+        ) : (
+          filteredNotes.map((note, index) => (
+            <SwipeableNoteCard
+              key={note.id}
+              note={note}
+              index={index}
+              playingId={playingId}
+              onTogglePlay={(id) => setPlayingId(playingId === id ? null : id)}
+              onDelete={handleDelete}
+              onOpen={handleOpen}
+              onOpenSummary={handleOpenSummary}
+              summaryState={summaryStates[note.id] || "idle"}
+              onSummarize={handleSummarize}
+              onCopy={handleCopy}
+            />
+          ))
+        )}
       </div>
     </div>
   );

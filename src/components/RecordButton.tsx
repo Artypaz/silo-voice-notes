@@ -1,10 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, Square, Pause, Play } from "lucide-react";
+import { saveNote } from "@/services/storageService";
+import { transcribeAudio } from "@/services/aiService";
+import { toast } from "sonner";
 
-const RecordButton = () => {
+interface RecordButtonProps {
+  onNoteSaved?: () => void;
+}
+
+const RecordButton = ({ onNoteSaved }: RecordButtonProps) => {
   const [state, setState] = useState<"idle" | "recording" | "paused">("idle");
   const [elapsed, setElapsed] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60);
@@ -12,11 +20,27 @@ const RecordButton = () => {
     return `${m.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
   };
 
+  // Timer logic
+  useEffect(() => {
+    if (state === "recording") {
+      timerRef.current = setInterval(() => {
+        setElapsed((prev) => prev + 1);
+      }, 1000);
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [state]);
+
   const handleRecord = () => {
     if (state === "idle") {
       setState("recording");
       setElapsed(0);
-      // In real app, start recording here
     } else if (state === "recording") {
       setState("paused");
     } else {
@@ -24,10 +48,35 @@ const RecordButton = () => {
     }
   };
 
-  const handleStop = () => {
+  const handleStop = useCallback(async () => {
+    const duration = elapsed;
     setState("idle");
     setElapsed(0);
-  };
+
+    if (duration < 1) return;
+
+    const now = new Date();
+    const noteId = crypto.randomUUID();
+    const audioPath = `local://recordings/${noteId}.m4a`;
+
+    // Mock transcription
+    const rawTranscript = await transcribeAudio(audioPath);
+
+    const newNote = {
+      id: noteId,
+      timestamp: now.getTime(),
+      audioPath,
+      rawTranscript,
+      aiSummary: null,
+      title: undefined,
+      duration: formatTime(duration),
+      segments: [{ time: "0:00", text: rawTranscript }],
+    };
+
+    saveNote(newNote);
+    toast.success("Note saved", { description: `Duration: ${formatTime(duration)}` });
+    onNoteSaved?.();
+  }, [elapsed, onNoteSaved]);
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6 gap-8">
@@ -53,29 +102,29 @@ const RecordButton = () => {
               className="flex flex-col items-center gap-3"
             >
               {/* Waveform bars */}
-              <div className="flex items-center gap-[3px] h-8">
-                {Array.from({ length: 20 }).map((_, i) => (
+              <div className="flex items-center gap-[3px] h-12">
+                {Array.from({ length: 30 }).map((_, i) => (
                   <motion.div
                     key={i}
                     className="w-[3px] rounded-full bg-primary"
                     animate={
                       state === "recording"
                         ? {
-                            height: [4, Math.random() * 28 + 4, 4],
+                            height: [4, Math.random() * 40 + 6, 4],
                           }
                         : { height: 4 }
                     }
                     transition={{
-                      duration: 0.6 + Math.random() * 0.4,
+                      duration: 0.5 + Math.random() * 0.5,
                       repeat: Infinity,
                       ease: "easeInOut",
-                      delay: i * 0.05,
+                      delay: i * 0.04,
                     }}
                     style={{ height: 4 }}
                   />
                 ))}
               </div>
-              <span className="text-foreground font-mono text-2xl font-light tracking-wider">
+              <span className="text-foreground font-mono text-3xl font-light tracking-wider">
                 {formatTime(elapsed)}
               </span>
               <span className={`text-xs font-medium ${state === "recording" ? "text-primary" : "text-muted-foreground"}`}>

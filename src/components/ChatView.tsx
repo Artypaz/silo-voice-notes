@@ -1,11 +1,13 @@
-import { useState, useRef } from "react";
-import { motion } from "framer-motion";
-import { Send, User, Sparkles, FileText, Mic, MicOff } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Send, User, Sparkles, FileText, Mic, MicOff, Loader2 } from "lucide-react";
+import { generateChatResponse } from "@/services/aiService";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  isThinking?: boolean;
   actions?: { label: string; icon: React.ReactNode; action: string }[];
 }
 
@@ -26,7 +28,16 @@ const ChatView = () => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll on new messages
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const startListening = () => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -65,9 +76,10 @@ const ChatView = () => {
     if (isListening) stopListening();
     else startListening();
   };
-  const handleSend = (text?: string) => {
+
+  const handleSend = async (text?: string) => {
     const content = text || input.trim();
-    if (!content) return;
+    if (!content || isThinking) return;
 
     const userMsg: Message = {
       id: Date.now().toString(),
@@ -75,29 +87,39 @@ const ChatView = () => {
       content,
     };
 
-    let aiContent = "I can help with that! What specifically would you like to know about your notes?";
-    let aiActions: Message["actions"] | undefined;
-
-    if (content.toLowerCase().includes("summarize")) {
-      aiContent =
-        "Here's a summary of your recent notes:\n\n• Personal reflection on slowing down and appreciating life\n• Daily workflow using voice memos while walking\n• Winter preparation and garden maintenance planning\n• Product launch meeting — designs due Friday, manufacturing by month end";
-    } else if (content.toLowerCase().includes("recent")) {
-      aiContent =
-        "You have 4 voice notes from the last 2 days. Would you like me to summarize them or search for something specific?";
-      aiActions = [
-        { label: "Summarize all", icon: <Sparkles className="w-3.5 h-3.5" />, action: "summarize" },
-      ];
-    }
-
-    const aiMsg: Message = {
-      id: (Date.now() + 1).toString(),
+    // Add user message + thinking indicator
+    const thinkingMsg: Message = {
+      id: "thinking",
       role: "assistant",
-      content: aiContent,
-      actions: aiActions,
+      content: "",
+      isThinking: true,
     };
 
-    setMessages((prev) => [...prev, userMsg, aiMsg]);
+    setMessages((prev) => [...prev, userMsg, thinkingMsg]);
     setInput("");
+    setIsThinking(true);
+
+    try {
+      const aiContent = await generateChatResponse(content);
+
+      const aiMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: aiContent,
+      };
+
+      setMessages((prev) => prev.filter((m) => m.id !== "thinking").concat(aiMsg));
+    } catch {
+      setMessages((prev) =>
+        prev.filter((m) => m.id !== "thinking").concat({
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "Sorry, I encountered an error. Please try again.",
+        })
+      );
+    } finally {
+      setIsThinking(false);
+    }
   };
 
   const handleAction = (action: string) => {
@@ -111,7 +133,7 @@ const ChatView = () => {
   return (
     <div className="flex-1 flex flex-col min-h-0 px-4">
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto py-3 space-y-3 scrollbar-none">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto py-3 space-y-3 scrollbar-none">
         {messages.map((msg, index) => (
           <motion.div
             key={msg.id}
@@ -142,11 +164,18 @@ const ChatView = () => {
                     : "bg-primary text-primary-foreground"
                 }`}
               >
-                <p className="text-[13px] leading-relaxed whitespace-pre-line">{msg.content}</p>
+                {msg.isThinking ? (
+                  <div className="flex items-center gap-2 py-1">
+                    <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
+                    <span className="text-[13px] text-muted-foreground">Thinking...</span>
+                  </div>
+                ) : (
+                  <p className="text-[13px] leading-relaxed whitespace-pre-line">{msg.content}</p>
+                )}
               </div>
 
               {/* Action buttons */}
-              {msg.actions && (
+              {msg.actions && !msg.isThinking && (
                 <div className="flex flex-wrap gap-1.5">
                   {msg.actions.map((a) => (
                     <button
@@ -174,7 +203,8 @@ const ChatView = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+            disabled={isThinking}
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none disabled:opacity-50"
           />
           <button
             onClick={toggleListening}
@@ -190,7 +220,7 @@ const ChatView = () => {
           </button>
           <button
             onClick={() => { stopListening(); handleSend(); }}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isThinking}
             className="p-2 rounded-full bg-primary disabled:opacity-30 transition-opacity"
           >
             <Send className="w-3.5 h-3.5 text-primary-foreground" />

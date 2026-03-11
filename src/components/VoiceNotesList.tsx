@@ -154,11 +154,37 @@ const SwipeableNoteCard = ({
         {/* Footer */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {note.hasSummary && (
+            {summaryState === "done" ? (
               <div className="flex items-center gap-1 text-primary">
                 <Sparkles className="w-3 h-3" />
                 <span className="text-[10px] font-medium">Summarized</span>
               </div>
+            ) : summaryState === "loading" ? (
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Loader2 className="w-3 h-3 animate-spin text-primary" />
+                <div className="flex items-center gap-1.5">
+                  <div className="w-16 h-1 rounded-full bg-muted overflow-hidden">
+                    <motion.div
+                      className="h-full bg-primary rounded-full"
+                      initial={{ width: "0%" }}
+                      animate={{ width: "100%" }}
+                      transition={{ duration: 2, ease: "easeInOut" }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-medium">Summarizing…</span>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSummarize(note.id);
+                }}
+                className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Sparkles className="w-3 h-3" />
+                <span className="text-[10px] font-medium">Summarize</span>
+              </button>
             )}
           </div>
 

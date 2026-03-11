@@ -14,12 +14,11 @@ const Index = () => {
   return (
     <div className="flex flex-col h-[100dvh] bg-background max-w-[430px] mx-auto relative overflow-hidden">
       {/* Header */}
-      <header className="safe-top px-5 pb-2 flex items-end justify-between shrink-0">
-        <h1 className="text-gradient text-xl font-bold tracking-tight text-center font-mono mx-0">​Silo</h1>
+      <header className="safe-top px-5 pb-2 flex items-center justify-center shrink-0 relative">
+        <h1 className="text-gradient text-xl font-bold tracking-tight font-mono">Silo</h1>
         <button
           onClick={() => setSettingsOpen(true)}
-          className="p-2 -mr-2 rounded-full hover:bg-muted/50 transition-colors">
-          
+          className="absolute right-5 p-2 rounded-full hover:bg-muted/50 transition-colors">
           <Settings className="w-5 h-5 text-muted-foreground" />
         </button>
       </header>

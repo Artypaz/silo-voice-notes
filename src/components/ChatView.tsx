@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Send, Bot, User, Sparkles } from "lucide-react";
+import { Send, User, Sparkles, FileText } from "lucide-react";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  actions?: { label: string; icon: React.ReactNode; action: string }[];
 }
 
 const initialMessages: Message[] = [
@@ -14,6 +15,10 @@ const initialMessages: Message[] = [
     role: "assistant",
     content:
       "Hi! I'm Silo, your local AI assistant. I can summarize your notes, answer questions about them, or help you organize your thoughts. Everything stays on your device.",
+    actions: [
+      { label: "Summarize my notes", icon: <Sparkles className="w-3.5 h-3.5" />, action: "summarize" },
+      { label: "Show recent notes", icon: <FileText className="w-3.5 h-3.5" />, action: "recent" },
+    ],
   },
 ];
 
@@ -21,24 +26,47 @@ const ChatView = () => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = (text?: string) => {
+    const content = text || input.trim();
+    if (!content) return;
 
     const userMsg: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: input.trim(),
+      content,
     };
+
+    let aiContent = "I can help with that! What specifically would you like to know about your notes?";
+    let aiActions: Message["actions"] | undefined;
+
+    if (content.toLowerCase().includes("summarize")) {
+      aiContent =
+        "Here's a summary of your recent notes:\n\n• Personal reflection on slowing down and appreciating life\n• Daily workflow using voice memos while walking\n• Winter preparation and garden maintenance planning\n• Product launch meeting — designs due Friday, manufacturing by month end";
+    } else if (content.toLowerCase().includes("recent")) {
+      aiContent =
+        "You have 4 voice notes from the last 2 days. Would you like me to summarize them or search for something specific?";
+      aiActions = [
+        { label: "Summarize all", icon: <Sparkles className="w-3.5 h-3.5" />, action: "summarize" },
+      ];
+    }
 
     const aiMsg: Message = {
       id: (Date.now() + 1).toString(),
       role: "assistant",
-      content:
-        "I've analyzed your recent voice notes. Here's what I found: You have 4 recordings from today covering meeting notes, personal reflections, and task reminders. Would you like me to create a summary?",
+      content: aiContent,
+      actions: aiActions,
     };
 
     setMessages((prev) => [...prev, userMsg, aiMsg]);
     setInput("");
+  };
+
+  const handleAction = (action: string) => {
+    const labels: Record<string, string> = {
+      summarize: "Summarize my notes",
+      recent: "Show recent notes",
+    };
+    handleSend(labels[action] || action);
   };
 
   return (
@@ -66,17 +94,33 @@ const ChatView = () => {
               )}
             </div>
 
-            {/* Bubble */}
-            <div
-              className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 ${
-                msg.role === "assistant"
-                  ? "glass"
-                  : "bg-primary text-primary-foreground"
-              }`}
-            >
-              <p className="text-[13px] leading-relaxed">
-                {msg.content}
-              </p>
+            {/* Bubble + actions */}
+            <div className="max-w-[80%] space-y-2">
+              <div
+                className={`rounded-2xl px-3.5 py-2.5 ${
+                  msg.role === "assistant"
+                    ? "glass"
+                    : "bg-primary text-primary-foreground"
+                }`}
+              >
+                <p className="text-[13px] leading-relaxed whitespace-pre-line">{msg.content}</p>
+              </div>
+
+              {/* Action buttons */}
+              {msg.actions && (
+                <div className="flex flex-wrap gap-1.5">
+                  {msg.actions.map((a) => (
+                    <button
+                      key={a.action}
+                      onClick={() => handleAction(a.action)}
+                      className="glass rounded-full px-3 py-1.5 flex items-center gap-1.5 hover:bg-muted/50 transition-colors"
+                    >
+                      <span className="text-primary">{a.icon}</span>
+                      <span className="text-xs font-medium text-foreground">{a.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </motion.div>
         ))}
@@ -94,7 +138,7 @@ const ChatView = () => {
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
           />
           <button
-            onClick={handleSend}
+            onClick={() => handleSend()}
             disabled={!input.trim()}
             className="p-2 rounded-full bg-primary disabled:opacity-30 transition-opacity"
           >

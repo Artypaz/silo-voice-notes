@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Send, User, Sparkles, FileText } from "lucide-react";
+import { Send, User, Sparkles, FileText, Mic, MicOff } from "lucide-react";
 
 interface Message {
   id: string;
@@ -25,7 +25,46 @@ const initialMessages: Message[] = [
 const ChatView = () => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
+  const startListening = () => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) {
+      alert("Speech recognition is not supported in this browser.");
+      return;
+    }
+
+    const recognition = new SR();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+
+    recognition.onresult = (event: any) => {
+      let transcript = "";
+      for (let i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setInput(transcript);
+    };
+
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  };
+
+  const stopListening = () => {
+    recognitionRef.current?.stop();
+    setIsListening(false);
+  };
+
+  const toggleListening = () => {
+    if (isListening) stopListening();
+    else startListening();
+  };
   const handleSend = (text?: string) => {
     const content = text || input.trim();
     if (!content) return;
@@ -131,14 +170,26 @@ const ChatView = () => {
         <div className="glass-strong rounded-2xl flex items-center gap-2 px-3 py-2">
           <input
             type="text"
-            placeholder="Ask about your notes..."
+            placeholder={isListening ? "Listening..." : "Ask about your notes..."}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
           />
           <button
-            onClick={() => handleSend()}
+            onClick={toggleListening}
+            className={`p-2 rounded-full transition-colors ${
+              isListening ? "bg-destructive" : "hover:bg-muted/50"
+            }`}
+          >
+            {isListening ? (
+              <MicOff className="w-3.5 h-3.5 text-destructive-foreground" />
+            ) : (
+              <Mic className="w-3.5 h-3.5 text-muted-foreground" />
+            )}
+          </button>
+          <button
+            onClick={() => { stopListening(); handleSend(); }}
             disabled={!input.trim()}
             className="p-2 rounded-full bg-primary disabled:opacity-30 transition-opacity"
           >

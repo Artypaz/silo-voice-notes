@@ -355,7 +355,7 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                       {/* Total Storage Card */}
                       <div className="glass rounded-2xl p-4 mb-4">
                         <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm text-muted-foreground">Total Storage</span>
+                          <span className="text-sm text-muted-foreground">Memory</span>
                           <span className="text-2xl font-bold text-foreground">{totalStorageMB.toFixed(1)} MB</span>
                         </div>
                         <div className="h-px bg-border mb-3" />

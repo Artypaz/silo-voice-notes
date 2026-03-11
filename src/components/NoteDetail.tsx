@@ -203,28 +203,24 @@ const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo }: NoteDetail
 
       {/* Swipeable tab indicator */}
       {isSummarized && (
-        <div className="flex items-center justify-center gap-3 px-4 pb-2 shrink-0">
+        <div className="flex items-center mx-4 mb-2 shrink-0 border-b border-border">
           <button
             onClick={() => setActiveTab("summary")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-all duration-200 border-b-2 -mb-px ${
               activeTab === "summary"
-                ? "bg-primary text-primary-foreground scale-105"
-                : "bg-muted/50 text-muted-foreground hover:text-foreground"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
             <Sparkles className="w-3 h-3" />
             Summary
           </button>
-          <div className="flex items-center gap-1">
-            <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-200 ${activeTab === "summary" ? "bg-primary" : "bg-muted-foreground/30"}`} />
-            <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-200 ${activeTab === "transcript" ? "bg-primary" : "bg-muted-foreground/30"}`} />
-          </div>
           <button
             onClick={() => setActiveTab("transcript")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-all duration-200 border-b-2 -mb-px ${
               activeTab === "transcript"
-                ? "bg-primary text-primary-foreground scale-105"
-                : "bg-muted/50 text-muted-foreground hover:text-foreground"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
             <MessageSquareText className="w-3 h-3" />

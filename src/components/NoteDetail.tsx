@@ -388,27 +388,41 @@ const NoteDetail = ({ note, onBack, isSummarized = false }: NoteDetailProps) => 
                   </div>
                 </div>
               )}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="transcript"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.15 }}
-              className="space-y-6 pt-2"
-            >
-              {filteredSegments.map((segment, i) => (
-                <div key={i}>
-                  <span className="text-xs text-primary font-mono mb-1.5 block">{segment.time}</span>
-                  <p className="text-[15px] text-foreground leading-relaxed">
-                    {highlightText(segment.text)}
-                  </p>
-                </div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                Summarize this note to see the summary
+              </div>
+            )}
+          </div>
+
+          {/* Transcript pane */}
+          <div className="w-1/2 h-full overflow-y-auto px-4 pb-4 scrollbar-none">
+            <div className="space-y-1 pt-2">
+              {filteredSegments.map((segment, i) => {
+                const realIndex = segments.indexOf(segment);
+                return (
+                  <button
+                    key={i}
+                    onClick={() => handleSegmentClick(realIndex, segment.time)}
+                    className={`w-full text-left rounded-xl px-3 py-2.5 transition-colors ${
+                      activeSegmentIndex === realIndex
+                        ? "bg-primary/10 border border-primary/20"
+                        : "hover:bg-muted/30"
+                    }`}
+                  >
+                    <span className="text-xs text-primary font-mono mb-1 block">{segment.time}</span>
+                    <p className={`text-[15px] leading-relaxed ${
+                      activeSegmentIndex === realIndex ? "text-primary" : "text-foreground"
+                    }`}>
+                      {highlightText(segment.text)}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </motion.div>
       </div>
 
       {/* Playback bar */}

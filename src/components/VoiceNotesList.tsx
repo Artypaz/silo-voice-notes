@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
-import { Play, Pause, MoreHorizontal, Sparkles, Search, Trash2 } from "lucide-react";
+import { Play, Pause, MoreHorizontal, Sparkles, Search, Trash2, Loader2 } from "lucide-react";
 import NoteDetail from "./NoteDetail";
 
 export interface VoiceNote {
@@ -77,6 +77,8 @@ const SwipeableNoteCard = ({
   onTogglePlay,
   onDelete,
   onOpen,
+  summaryState,
+  onSummarize,
 }: {
   note: VoiceNote;
   index: number;
@@ -84,6 +86,8 @@ const SwipeableNoteCard = ({
   onTogglePlay: (id: string) => void;
   onDelete: (id: string) => void;
   onOpen: (note: VoiceNote) => void;
+  summaryState: "idle" | "loading" | "done";
+  onSummarize: (id: string) => void;
 }) => {
   const x = useMotionValue(0);
   const deleteOpacity = useTransform(x, [-100, -60, 0], [1, 0.8, 0]);
@@ -149,11 +153,37 @@ const SwipeableNoteCard = ({
         {/* Footer */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {note.hasSummary && (
+            {summaryState === "done" ? (
               <div className="flex items-center gap-1 text-primary">
                 <Sparkles className="w-3 h-3" />
                 <span className="text-[10px] font-medium">Summarized</span>
               </div>
+            ) : summaryState === "loading" ? (
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Loader2 className="w-3 h-3 animate-spin text-primary" />
+                <div className="flex items-center gap-1.5">
+                  <div className="w-16 h-1 rounded-full bg-muted overflow-hidden">
+                    <motion.div
+                      className="h-full bg-primary rounded-full"
+                      initial={{ width: "0%" }}
+                      animate={{ width: "100%" }}
+                      transition={{ duration: 2, ease: "easeInOut" }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-medium">Summarizing…</span>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSummarize(note.id);
+                }}
+                className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Sparkles className="w-3 h-3" />
+                <span className="text-[10px] font-medium">Summarize</span>
+              </button>
             )}
           </div>
 
@@ -186,6 +216,20 @@ const VoiceNotesList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [notes, setNotes] = useState(mockNotes);
   const [selectedNote, setSelectedNote] = useState<VoiceNote | null>(null);
+  const [summaryStates, setSummaryStates] = useState<Record<string, "idle" | "loading" | "done">>(() => {
+    const initial: Record<string, "idle" | "loading" | "done"> = {};
+    mockNotes.forEach((n) => {
+      initial[n.id] = n.hasSummary ? "done" : "idle";
+    });
+    return initial;
+  });
+
+  const handleSummarize = useCallback((id: string) => {
+    setSummaryStates((prev) => ({ ...prev, [id]: "loading" }));
+    setTimeout(() => {
+      setSummaryStates((prev) => ({ ...prev, [id]: "done" }));
+    }, 2200);
+  }, []);
 
   const filteredNotes = notes.filter((n) =>
     n.transcript.toLowerCase().includes(searchQuery.toLowerCase())
@@ -224,6 +268,8 @@ const VoiceNotesList = () => {
             onTogglePlay={(id) => setPlayingId(playingId === id ? null : id)}
             onDelete={handleDelete}
             onOpen={setSelectedNote}
+            summaryState={summaryStates[note.id] || "idle"}
+            onSummarize={handleSummarize}
           />
         ))}
       </div>

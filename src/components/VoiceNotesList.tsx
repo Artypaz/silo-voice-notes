@@ -77,6 +77,9 @@ const SwipeableNoteCard = ({
   onTogglePlay,
   onDelete,
   onOpen,
+  onOpen,
+  summaryState,
+  onSummarize,
 }: {
   note: VoiceNote;
   index: number;
@@ -84,6 +87,8 @@ const SwipeableNoteCard = ({
   onTogglePlay: (id: string) => void;
   onDelete: (id: string) => void;
   onOpen: (note: VoiceNote) => void;
+  summaryState: "idle" | "loading" | "done";
+  onSummarize: (id: string) => void;
 }) => {
   const x = useMotionValue(0);
   const deleteOpacity = useTransform(x, [-100, -60, 0], [1, 0.8, 0]);

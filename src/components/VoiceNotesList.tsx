@@ -324,6 +324,7 @@ const VoiceNotesList = () => {
             onOpen={setSelectedNote}
             summaryState={summaryStates[note.id] || "idle"}
             onSummarize={handleSummarize}
+            onCopy={handleCopy}
           />
         ))}
       </div>

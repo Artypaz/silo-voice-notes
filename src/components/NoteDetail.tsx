@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowLeft, Play, Pause, Search, MoreVertical, Copy, Clock, FileText, Type } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Play, Pause, Search, MoreVertical, Copy, Clock, FileText, Type, Sparkles, ListChecks, MessageSquareText } from "lucide-react";
 import type { VoiceNote } from "./VoiceNotesList";
 import {
   DropdownMenu,
@@ -13,12 +13,25 @@ import {
 interface NoteDetailProps {
   note: VoiceNote;
   onBack: () => void;
+  isSummarized?: boolean;
 }
 
-const NoteDetail = ({ note, onBack }: NoteDetailProps) => {
+const mockSummary = {
+  overview: "A reflective note about taking life slowly and appreciating the moment. Emphasizes the importance of not rushing through experiences.",
+  actionItems: [
+    "Practice mindfulness during daily activities",
+    "Take time to appreciate small moments",
+    "Avoid over-scheduling the week",
+  ],
+};
+
+const NoteDetail = ({ note, onBack, isSummarized = false }: NoteDetailProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const [activeTab, setActiveTab] = useState<"transcript" | "summary">(
+    isSummarized ? "summary" : "transcript"
+  );
 
   const segments = note.segments || [{ time: "0:00", text: note.transcript }];
 
@@ -54,7 +67,9 @@ const NoteDetail = ({ note, onBack }: NoteDetailProps) => {
         <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-muted/50 transition-colors">
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
-        <span className="text-sm font-medium text-foreground">Transcript</span>
+        <span className="text-sm font-medium text-foreground">
+          {note.date} · {note.time}
+        </span>
         <div className="flex items-center gap-1">
           <button
             onClick={() => setShowSearch(!showSearch)}
@@ -91,6 +106,34 @@ const NoteDetail = ({ note, onBack }: NoteDetailProps) => {
         </div>
       </div>
 
+      {/* Tab switcher - only show if summarized */}
+      {isSummarized && (
+        <div className="flex items-center gap-1 px-4 pb-2 shrink-0">
+          <button
+            onClick={() => setActiveTab("summary")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              activeTab === "summary"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted/50 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Sparkles className="w-3 h-3" />
+            Summary
+          </button>
+          <button
+            onClick={() => setActiveTab("transcript")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              activeTab === "transcript"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted/50 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <MessageSquareText className="w-3 h-3" />
+            Transcript
+          </button>
+        </div>
+      )}
+
       {/* Search bar */}
       {showSearch && (
         <motion.div
@@ -113,18 +156,67 @@ const NoteDetail = ({ note, onBack }: NoteDetailProps) => {
         </motion.div>
       )}
 
-      {/* Transcript segments */}
+      {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-none">
-        <div className="space-y-6 pt-2">
-          {filteredSegments.map((segment, i) => (
-            <div key={i}>
-              <span className="text-xs text-primary font-mono mb-1.5 block">{segment.time}</span>
-              <p className="text-[15px] text-foreground leading-relaxed">
-                {highlightText(segment.text)}
-              </p>
-            </div>
-          ))}
-        </div>
+        <AnimatePresence mode="wait">
+          {activeTab === "summary" && isSummarized ? (
+            <motion.div
+              key="summary"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.15 }}
+              className="space-y-4 pt-2"
+            >
+              {/* Overview */}
+              <div className="glass rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-semibold text-primary uppercase tracking-wider">Overview</span>
+                </div>
+                <p className="text-sm text-foreground/90 leading-relaxed">
+                  {mockSummary.overview}
+                </p>
+              </div>
+
+              {/* Action Items */}
+              <div className="glass rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <ListChecks className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-semibold text-primary uppercase tracking-wider">Action Items</span>
+                </div>
+                <div className="space-y-2.5">
+                  {mockSummary.actionItems.map((item, i) => (
+                    <div key={i} className="flex items-start gap-2.5">
+                      <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="text-[10px] font-bold text-primary">{i + 1}</span>
+                      </div>
+                      <p className="text-sm text-foreground/90 leading-relaxed">{item}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="transcript"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.15 }}
+              className="space-y-6 pt-2"
+            >
+              {filteredSegments.map((segment, i) => (
+                <div key={i}>
+                  <span className="text-xs text-primary font-mono mb-1.5 block">{segment.time}</span>
+                  <p className="text-[15px] text-foreground leading-relaxed">
+                    {highlightText(segment.text)}
+                  </p>
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Playback bar */}

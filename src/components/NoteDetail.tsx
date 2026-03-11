@@ -43,11 +43,22 @@ const NoteDetail = ({ note, onBack, isSummarized = false }: NoteDetailProps) => 
   const [newItemText, setNewItemText] = useState("");
   const [showAddItem, setShowAddItem] = useState(false);
 
+  const [activeSegmentIndex, setActiveSegmentIndex] = useState<number | null>(null);
+  const [currentTime, setCurrentTime] = useState("00:00");
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const segments = note.segments || [{ time: "0:00", text: note.transcript }];
 
   const filteredSegments = searchQuery
     ? segments.filter((s) => s.text.toLowerCase().includes(searchQuery.toLowerCase()))
     : segments;
+
+  const handleSegmentClick = (index: number, time: string) => {
+    setActiveSegmentIndex(index);
+    setCurrentTime(time);
+    setIsPlaying(true);
+    toast.success(`Skipped to ${time}`);
+  };
 
   // Search within summary
   const overviewMatchesSearch = !searchQuery || overview.toLowerCase().includes(searchQuery.toLowerCase());

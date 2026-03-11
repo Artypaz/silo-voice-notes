@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useCallback, useRef } from "react";
+import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
 import { ArrowLeft, Play, Pause, Search, MoreVertical, Copy, Clock, FileText, Type, Sparkles, ListChecks, MessageSquareText, Pencil, Check, Plus, X, Trash2 } from "lucide-react";
 import type { VoiceNote } from "./VoiceNotesList";
 import {

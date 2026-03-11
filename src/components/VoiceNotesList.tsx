@@ -311,6 +311,11 @@ const VoiceNotesList = () => {
     setSelectedNote(note);
   }, []);
 
+  const handleUpdateTitle = useCallback((id: string, newTitle: string) => {
+    setNotes((prev) => prev.map((n) => n.id === id ? { ...n, title: newTitle } : n));
+    setSelectedNote((prev) => prev && prev.id === id ? { ...prev, title: newTitle } : prev);
+  }, []);
+
   if (selectedNote) {
     return (
       <NoteDetail
@@ -318,6 +323,7 @@ const VoiceNotesList = () => {
         onBack={() => setSelectedNote(null)}
         isSummarized={summaryStates[selectedNote.id] === "done"}
         defaultTab={openOnSummary ? "summary" : "transcript"}
+        onUpdateTitle={handleUpdateTitle}
       />
     );
   }

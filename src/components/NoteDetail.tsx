@@ -15,6 +15,7 @@ interface NoteDetailProps {
   note: VoiceNote;
   onBack: () => void;
   isSummarized?: boolean;
+  onSeekTo?: (time: string) => void;
 }
 
 const defaultSummary = {

@@ -28,12 +28,12 @@ const defaultSummary = {
   ],
 };
 
-const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo }: NoteDetailProps) => {
+const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo, defaultTab }: NoteDetailProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [activeTab, setActiveTab] = useState<"transcript" | "summary">(
-    isSummarized ? "summary" : "transcript"
+    defaultTab || "transcript"
   );
   const [activeSegmentIndex, setActiveSegmentIndex] = useState<number | null>(null);
 

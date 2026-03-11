@@ -217,6 +217,20 @@ const VoiceNotesList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [notes, setNotes] = useState(mockNotes);
   const [selectedNote, setSelectedNote] = useState<VoiceNote | null>(null);
+  const [summaryStates, setSummaryStates] = useState<Record<string, "idle" | "loading" | "done">>(() => {
+    const initial: Record<string, "idle" | "loading" | "done"> = {};
+    mockNotes.forEach((n) => {
+      initial[n.id] = n.hasSummary ? "done" : "idle";
+    });
+    return initial;
+  });
+
+  const handleSummarize = useCallback((id: string) => {
+    setSummaryStates((prev) => ({ ...prev, [id]: "loading" }));
+    setTimeout(() => {
+      setSummaryStates((prev) => ({ ...prev, [id]: "done" }));
+    }, 2200);
+  }, []);
 
   const filteredNotes = notes.filter((n) =>
     n.transcript.toLowerCase().includes(searchQuery.toLowerCase())

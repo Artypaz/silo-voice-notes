@@ -77,7 +77,6 @@ const SwipeableNoteCard = ({
   onTogglePlay,
   onDelete,
   onOpen,
-  onOpen,
   summaryState,
   onSummarize,
 }: {

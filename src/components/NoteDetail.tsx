@@ -450,7 +450,7 @@ const NoteDetail = ({ note, onBack, isSummarized = false }: NoteDetailProps) => 
           </div>
 
           <span className="text-xs text-muted-foreground font-mono shrink-0">
-            00:00 / {note.duration}
+            {currentTime} / {note.duration}
           </span>
         </div>
       </div>

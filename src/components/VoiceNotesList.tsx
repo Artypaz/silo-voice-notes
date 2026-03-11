@@ -147,13 +147,18 @@ const SwipeableNoteCard = ({
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-1">
-          <span className="text-xs text-muted-foreground font-mono">
-            {note.date} {note.time}
-          </span>
+          <div className="flex flex-col min-w-0 flex-1">
+            {note.title && (
+              <h3 className="text-sm font-semibold text-foreground truncate">{note.title}</h3>
+            )}
+            <span className="text-xs text-muted-foreground font-mono">
+              {note.date} {note.time}
+            </span>
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="p-1 rounded-full hover:bg-muted/50 transition-colors"
+                className="p-1 rounded-full hover:bg-muted/50 transition-colors shrink-0"
                 onClick={(e) => e.stopPropagation()}
               >
                 <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
@@ -190,11 +195,6 @@ const SwipeableNoteCard = ({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-
-        {/* Title */}
-        {note.title && (
-          <h3 className="text-sm font-semibold text-foreground mb-1.5 truncate">{note.title}</h3>
-        )}
 
         {/* Transcript */}
         <p className="text-sm text-foreground/90 leading-relaxed line-clamp-2 mb-3">

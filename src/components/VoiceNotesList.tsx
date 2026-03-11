@@ -24,6 +24,7 @@ export interface VoiceNote {
 const mockNotes: VoiceNote[] = [
   {
     id: "1",
+    title: "Morning Reflection",
     date: "2025-03-11",
     time: "14:32",
     transcript:

@@ -33,6 +33,7 @@ const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo, defaultTab, 
   const [isPlaying, setIsPlaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const [fontSize, setFontSize] = useState(15);
   const [activeTab, setActiveTab] = useState<"transcript" | "summary">(
     defaultTab || "transcript"
   );

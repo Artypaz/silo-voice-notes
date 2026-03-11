@@ -236,18 +236,28 @@ const NoteDetail = ({ note, onBack, isSummarized = false }: NoteDetailProps) => 
         </motion.div>
       )}
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-none">
-        <AnimatePresence mode="wait">
-          {activeTab === "summary" && isSummarized ? (
-            <motion.div
-              key="summary"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.15 }}
-              className="space-y-4 pt-2"
-            >
+      {/* Content - swipeable */}
+      <div
+        ref={containerRef}
+        className="flex-1 overflow-hidden relative min-h-0"
+      >
+        <motion.div
+          className="flex h-full"
+          animate={{ x: activeTab === "summary" && isSummarized ? "0%" : "-100%" }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          drag={isSummarized ? "x" : false}
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.15}
+          onDragEnd={(_, info) => {
+            if (info.offset.x > 80) setActiveTab("summary");
+            else if (info.offset.x < -80) setActiveTab("transcript");
+          }}
+          style={{ width: "200%" }}
+        >
+          {/* Summary pane */}
+          <div className="w-1/2 h-full overflow-y-auto px-4 pb-4 scrollbar-none">
+            {isSummarized ? (
+              <div className="space-y-4 pt-2">
               {/* Overview */}
               {(overviewMatchesSearch || !searchQuery) && (
                 <div className="glass rounded-2xl p-4">

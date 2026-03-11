@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
-import { ArrowLeft, Play, Pause, Search, MoreVertical, Copy, Clock, FileText, Type, Sparkles, ListChecks, MessageSquareText, Pencil, Check, Plus, X, Trash2 } from "lucide-react";
+import { ArrowLeft, Play, Pause, Search, MoreVertical, Copy, Clock, FileText, Type, Sparkles, ListChecks, MessageSquareText, Pencil, Check, Plus, X, Trash2, Minus } from "lucide-react";
 import type { VoiceNote } from "./VoiceNotesList";
 import {
   DropdownMenu,
@@ -33,6 +33,7 @@ const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo, defaultTab, 
   const [isPlaying, setIsPlaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const [fontSize, setFontSize] = useState(15);
   const [activeTab, setActiveTab] = useState<"transcript" | "summary">(
     defaultTab || "transcript"
   );
@@ -215,10 +216,18 @@ const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo, defaultTab, 
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => {
+                const text = segments.map(s => s.text).join("\n");
+                navigator.clipboard.writeText(text);
+                toast.success("Text copied");
+              }}>
                 <Copy className="w-4 h-4 mr-2" /> Copy Text
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => {
+                const text = segments.map(s => `[${s.time}] ${s.text}`).join("\n");
+                navigator.clipboard.writeText(text);
+                toast.success("Transcript with timestamps copied");
+              }}>
                 <Clock className="w-4 h-4 mr-2" /> Copy with Timestamps
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -229,9 +238,29 @@ const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo, defaultTab, 
                 <FileText className="w-4 h-4 mr-2" /> Export TXT
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Type className="w-4 h-4 mr-2" /> Font Size
-              </DropdownMenuItem>
+              <div className="px-2 py-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <Type className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm">Font Size</span>
+                  <span className="text-xs text-muted-foreground ml-auto">{fontSize}px</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setFontSize(f => Math.max(12, f - 1))} className="p-1 rounded hover:bg-muted/50">
+                    <Minus className="w-3 h-3 text-muted-foreground" />
+                  </button>
+                  <input
+                    type="range"
+                    min={12}
+                    max={24}
+                    value={fontSize}
+                    onChange={(e) => setFontSize(Number(e.target.value))}
+                    className="flex-1 h-1.5 accent-primary cursor-pointer"
+                  />
+                  <button onClick={() => setFontSize(f => Math.min(24, f + 1))} className="p-1 rounded hover:bg-muted/50">
+                    <Plus className="w-3 h-3 text-muted-foreground" />
+                  </button>
+                </div>
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -464,9 +493,9 @@ const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo, defaultTab, 
                   }`}>
                     {segment.time}
                   </span>
-                  <p className={`text-[15px] leading-relaxed transition-colors ${
+                  <p className={`leading-relaxed transition-colors ${
                     activeSegmentIndex === i ? "text-primary" : "text-foreground"
-                  }`}>
+                  }`} style={{ fontSize: `${fontSize}px` }}>
                     {highlightText(segment.text)}
                   </p>
                 </button>

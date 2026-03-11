@@ -86,6 +86,7 @@ const SwipeableNoteCard = ({
   onOpen,
   summaryState,
   onSummarize,
+  onCopy,
 }: {
   note: VoiceNote;
   index: number;

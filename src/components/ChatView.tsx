@@ -13,7 +13,7 @@ const initialMessages: Message[] = [
     id: "1",
     role: "assistant",
     content:
-      "Hi! I'm Aura, your local AI assistant. I can summarize your notes, answer questions about them, or help you organize your thoughts. Everything stays on your device.",
+      "Hi! I'm Silo, your local AI assistant. I can summarize your notes, answer questions about them, or help you organize your thoughts. Everything stays on your device.",
   },
 ];
 

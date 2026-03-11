@@ -1,7 +1,14 @@
 import { useState, useCallback } from "react";
 import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
-import { Play, Pause, MoreHorizontal, Sparkles, Search, Trash2, Loader2 } from "lucide-react";
+import { Play, Pause, MoreHorizontal, Sparkles, Search, Trash2, Loader2, Copy, Star, Pencil, Share, RefreshCw, CheckCircle2 } from "lucide-react";
 import NoteDetail from "./NoteDetail";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export interface VoiceNote {
   id: string;
@@ -79,6 +86,7 @@ const SwipeableNoteCard = ({
   onOpen,
   summaryState,
   onSummarize,
+  onCopy,
 }: {
   note: VoiceNote;
   index: number;
@@ -88,6 +96,7 @@ const SwipeableNoteCard = ({
   onOpen: (note: VoiceNote) => void;
   summaryState: "idle" | "loading" | "done";
   onSummarize: (id: string) => void;
+  onCopy: (id: string) => void;
 }) => {
   const x = useMotionValue(0);
   const deleteOpacity = useTransform(x, [-100, -60, 0], [1, 0.8, 0]);
@@ -137,12 +146,45 @@ const SwipeableNoteCard = ({
           <span className="text-xs text-muted-foreground font-mono">
             {note.date} {note.time}
           </span>
-          <button
-            className="p-1 rounded-full hover:bg-muted/50 transition-colors"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="p-1 rounded-full hover:bg-muted/50 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onCopy(note.id); }}>
+                <Copy className="w-4 h-4 mr-2" /> Copy Text
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                <Star className="w-4 h-4 mr-2" /> Add to Favorites
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                <Pencil className="w-4 h-4 mr-2" /> Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                <Share className="w-4 h-4 mr-2" /> Share
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                <RefreshCw className="w-4 h-4 mr-2" /> Re-Transcribe
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                <CheckCircle2 className="w-4 h-4 mr-2" /> Multi-Select
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={(e) => { e.stopPropagation(); onDelete(note.id); }}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="w-4 h-4 mr-2" /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Transcript */}
@@ -239,8 +281,21 @@ const VoiceNotesList = () => {
     setNotes((prev) => prev.filter((n) => n.id !== id));
   };
 
+  const handleCopy = useCallback((id: string) => {
+    const note = notes.find((n) => n.id === id);
+    if (note) {
+      navigator.clipboard.writeText(note.transcript);
+    }
+  }, [notes]);
+
   if (selectedNote) {
-    return <NoteDetail note={selectedNote} onBack={() => setSelectedNote(null)} />;
+    return (
+      <NoteDetail
+        note={selectedNote}
+        onBack={() => setSelectedNote(null)}
+        isSummarized={summaryStates[selectedNote.id] === "done"}
+      />
+    );
   }
 
   return (
@@ -270,6 +325,7 @@ const VoiceNotesList = () => {
             onOpen={setSelectedNote}
             summaryState={summaryStates[note.id] || "idle"}
             onSummarize={handleSummarize}
+            onCopy={handleCopy}
           />
         ))}
       </div>

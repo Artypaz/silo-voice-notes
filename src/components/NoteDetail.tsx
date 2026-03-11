@@ -255,15 +255,22 @@ const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo }: NoteDetail
         </motion.div>
       )}
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-none">
+      {/* Content - swipeable */}
+      <motion.div
+        className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-none"
+        drag={isSummarized ? "x" : false}
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.2}
+        onDragEnd={handleSwipeEnd}
+        style={{ x: dragX, touchAction: "pan-y" }}
+      >
         <AnimatePresence mode="wait">
           {activeTab === "summary" && isSummarized ? (
             <motion.div
               key="summary"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.15 }}
               className="space-y-4 pt-2"
             >
@@ -381,13 +388,19 @@ const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo }: NoteDetail
                         <input
                           value={newItemText}
                           onChange={(e) => setNewItemText(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && addItem()}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") addItem();
+                            if (e.key === "Escape") cancelAddItem();
+                          }}
                           placeholder="New action item..."
                           autoFocus
                           className="flex-1 bg-muted/30 rounded-lg text-sm text-foreground/90 px-2 py-1 outline-none border border-primary/20 focus:border-primary/50 transition-colors placeholder:text-muted-foreground"
                         />
                         <button onClick={addItem} className="p-1 rounded-full hover:bg-muted/50">
                           <Check className="w-3.5 h-3.5 text-primary" />
+                        </button>
+                        <button onClick={cancelAddItem} className="p-1 rounded-full hover:bg-muted/50">
+                          <X className="w-3.5 h-3.5 text-muted-foreground" />
                         </button>
                       </motion.div>
                     )}
@@ -398,24 +411,38 @@ const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo }: NoteDetail
           ) : (
             <motion.div
               key="transcript"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
               transition={{ duration: 0.15 }}
-              className="space-y-6 pt-2"
+              className="space-y-1 pt-2"
             >
               {filteredSegments.map((segment, i) => (
-                <div key={i}>
-                  <span className="text-xs text-primary font-mono mb-1.5 block">{segment.time}</span>
-                  <p className="text-[15px] text-foreground leading-relaxed">
+                <button
+                  key={i}
+                  onClick={() => handleSegmentClick(i, segment.time)}
+                  className={`w-full text-left rounded-xl px-3 py-3 transition-colors duration-200 ${
+                    activeSegmentIndex === i
+                      ? "bg-primary/10 border border-primary/20"
+                      : "hover:bg-muted/30"
+                  }`}
+                >
+                  <span className={`text-xs font-mono mb-1.5 block transition-colors ${
+                    activeSegmentIndex === i ? "text-primary font-semibold" : "text-primary/70"
+                  }`}>
+                    {segment.time}
+                  </span>
+                  <p className={`text-[15px] leading-relaxed transition-colors ${
+                    activeSegmentIndex === i ? "text-primary" : "text-foreground"
+                  }`}>
                     {highlightText(segment.text)}
                   </p>
-                </div>
+                </button>
               ))}
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
 
       {/* Playback bar */}
       <div className="shrink-0 px-4 pb-4 safe-bottom">

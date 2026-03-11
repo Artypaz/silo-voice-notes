@@ -222,7 +222,7 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                         {/* Memory / Storage */}
                         <div>
                           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">
-                            Storage
+                            Disk
                           </h3>
                           <div className="glass rounded-2xl divide-y divide-border">
                             <button onClick={() => setView("memory")} className="w-full">

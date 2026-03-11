@@ -186,7 +186,7 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                             <button onClick={() => setView("data")} className="w-full">
                               <SettingRow
                                 icon={<Database className="w-4 h-4" />}
-                                label="Data Management"
+                                label="Disk Management"
                                 trailing={<ChevronRight className="w-4 h-4 text-muted-foreground" />}
                               />
                             </button>

@@ -294,12 +294,23 @@ const VoiceNotesList = () => {
     }
   }, [notes]);
 
+  const handleOpen = useCallback((note: VoiceNote) => {
+    setOpenOnSummary(false);
+    setSelectedNote(note);
+  }, []);
+
+  const handleOpenSummary = useCallback((note: VoiceNote) => {
+    setOpenOnSummary(true);
+    setSelectedNote(note);
+  }, []);
+
   if (selectedNote) {
     return (
       <NoteDetail
         note={selectedNote}
         onBack={() => setSelectedNote(null)}
         isSummarized={summaryStates[selectedNote.id] === "done"}
+        defaultTab={openOnSummary ? "summary" : "transcript"}
       />
     );
   }

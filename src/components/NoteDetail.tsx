@@ -29,7 +29,7 @@ const defaultSummary = {
   ],
 };
 
-const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo, defaultTab }: NoteDetailProps) => {
+const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo, defaultTab, onUpdateTitle }: NoteDetailProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
@@ -37,6 +37,8 @@ const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo, defaultTab }
     defaultTab || "transcript"
   );
   const [activeSegmentIndex, setActiveSegmentIndex] = useState<number | null>(null);
+  const [title, setTitle] = useState(note.title || "");
+  const [editingTitle, setEditingTitle] = useState(false);
 
   // Swipe gesture
   const dragX = useMotionValue(0);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Settings } from "lucide-react";
 import RecordButton from "@/components/RecordButton";
@@ -10,6 +10,12 @@ import SettingsSheet from "@/components/SettingsSheet";
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"record" | "notes" | "chat">("record");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [notesRefreshKey, setNotesRefreshKey] = useState(0);
+
+  const handleNoteSaved = useCallback(() => {
+    setNotesRefreshKey((k) => k + 1);
+    setActiveTab("notes");
+  }, []);
 
   return (
     <div className="flex flex-col h-[100dvh] bg-background max-w-[430px] mx-auto relative overflow-hidden">
@@ -33,8 +39,8 @@ const Index = () => {
           transition={{ duration: 0.2, ease: "easeOut" }}
           className="flex-1 flex flex-col min-h-0">
           
-          {activeTab === "record" && <RecordButton />}
-          {activeTab === "notes" && <VoiceNotesList />}
+          {activeTab === "record" && <RecordButton onNoteSaved={handleNoteSaved} />}
+          {activeTab === "notes" && <VoiceNotesList refreshKey={notesRefreshKey} />}
           {activeTab === "chat" && <ChatView />}
         </motion.div>
       </AnimatePresence>
@@ -44,8 +50,8 @@ const Index = () => {
 
       {/* Settings sheet */}
       <SettingsSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} />
-    </div>);
-
+    </div>
+  );
 };
 
 export default Index;

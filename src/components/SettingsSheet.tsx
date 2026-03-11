@@ -295,16 +295,18 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
 const SettingRow = ({
   icon,
   label,
+  labelClassName,
   trailing,
 }: {
   icon: React.ReactNode;
   label: string;
+  labelClassName?: string;
   trailing?: React.ReactNode;
 }) => (
   <div className="flex items-center justify-between px-4 py-3">
     <div className="flex items-center gap-3">
       <span className="text-muted-foreground">{icon}</span>
-      <span className="text-sm font-medium text-foreground">{label}</span>
+      <span className={`text-sm font-medium ${labelClassName || "text-foreground"}`}>{label}</span>
     </div>
     {trailing}
   </div>

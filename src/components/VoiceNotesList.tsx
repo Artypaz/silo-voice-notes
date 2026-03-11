@@ -145,12 +145,45 @@ const SwipeableNoteCard = ({
           <span className="text-xs text-muted-foreground font-mono">
             {note.date} {note.time}
           </span>
-          <button
-            className="p-1 rounded-full hover:bg-muted/50 transition-colors"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="p-1 rounded-full hover:bg-muted/50 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onCopy(note.id); }}>
+                <Copy className="w-4 h-4 mr-2" /> Copy Text
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                <Star className="w-4 h-4 mr-2" /> Add to Favorites
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                <Pencil className="w-4 h-4 mr-2" /> Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                <Share className="w-4 h-4 mr-2" /> Share
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                <RefreshCw className="w-4 h-4 mr-2" /> Re-Transcribe
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                <CheckCircle2 className="w-4 h-4 mr-2" /> Multi-Select
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={(e) => { e.stopPropagation(); onDelete(note.id); }}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="w-4 h-4 mr-2" /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Transcript */}

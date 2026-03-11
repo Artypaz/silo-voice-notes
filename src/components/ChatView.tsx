@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Send, User, Sparkles, FileText, Mic, MicOff } from "lucide-react";
 

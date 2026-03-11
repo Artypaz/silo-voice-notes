@@ -84,6 +84,7 @@ const SwipeableNoteCard = ({
   onTogglePlay,
   onDelete,
   onOpen,
+  onOpenSummary,
   summaryState,
   onSummarize,
   onCopy,
@@ -94,6 +95,7 @@ const SwipeableNoteCard = ({
   onTogglePlay: (id: string) => void;
   onDelete: (id: string) => void;
   onOpen: (note: VoiceNote) => void;
+  onOpenSummary: (note: VoiceNote) => void;
   summaryState: "idle" | "loading" | "done";
   onSummarize: (id: string) => void;
   onCopy: (id: string) => void;
@@ -196,10 +198,13 @@ const SwipeableNoteCard = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {summaryState === "done" ? (
-              <div className="flex items-center gap-1 text-primary">
+              <button
+                onClick={(e) => { e.stopPropagation(); onOpenSummary(note); }}
+                className="flex items-center gap-1 text-primary hover:opacity-80 transition-opacity"
+              >
                 <Sparkles className="w-3 h-3" />
                 <span className="text-[10px] font-medium">Summarized</span>
-              </div>
+              </button>
             ) : summaryState === "loading" ? (
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <Loader2 className="w-3 h-3 animate-spin text-primary" />
@@ -258,6 +263,7 @@ const VoiceNotesList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [notes, setNotes] = useState(mockNotes);
   const [selectedNote, setSelectedNote] = useState<VoiceNote | null>(null);
+  const [openOnSummary, setOpenOnSummary] = useState(false);
   const [summaryStates, setSummaryStates] = useState<Record<string, "idle" | "loading" | "done">>(() => {
     const initial: Record<string, "idle" | "loading" | "done"> = {};
     mockNotes.forEach((n) => {
@@ -288,12 +294,23 @@ const VoiceNotesList = () => {
     }
   }, [notes]);
 
+  const handleOpen = useCallback((note: VoiceNote) => {
+    setOpenOnSummary(false);
+    setSelectedNote(note);
+  }, []);
+
+  const handleOpenSummary = useCallback((note: VoiceNote) => {
+    setOpenOnSummary(true);
+    setSelectedNote(note);
+  }, []);
+
   if (selectedNote) {
     return (
       <NoteDetail
         note={selectedNote}
         onBack={() => setSelectedNote(null)}
         isSummarized={summaryStates[selectedNote.id] === "done"}
+        defaultTab={openOnSummary ? "summary" : "transcript"}
       />
     );
   }
@@ -322,7 +339,8 @@ const VoiceNotesList = () => {
             playingId={playingId}
             onTogglePlay={(id) => setPlayingId(playingId === id ? null : id)}
             onDelete={handleDelete}
-            onOpen={setSelectedNote}
+            onOpen={handleOpen}
+            onOpenSummary={handleOpenSummary}
             summaryState={summaryStates[note.id] || "idle"}
             onSummarize={handleSummarize}
             onCopy={handleCopy}

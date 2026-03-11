@@ -191,8 +191,13 @@ const SwipeableNoteCard = ({
           </DropdownMenu>
         </div>
 
+        {/* Title */}
+        {note.title && (
+          <h3 className="text-sm font-semibold text-foreground mb-1.5 truncate">{note.title}</h3>
+        )}
+
         {/* Transcript */}
-        <p className="text-sm text-foreground/90 leading-relaxed line-clamp-3 mb-3">
+        <p className="text-sm text-foreground/90 leading-relaxed line-clamp-2 mb-3">
           {note.transcript}
         </p>
 

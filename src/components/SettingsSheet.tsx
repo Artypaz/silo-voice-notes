@@ -110,7 +110,7 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                     <div className="flex items-start gap-3">
                       <Shield className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                       <p className="text-xs text-muted-foreground leading-relaxed">
-                        Aura works completely offline — even in airplane mode. Your
+                        Silo works completely offline — even in airplane mode. Your
                         recordings never leave your device, and we never request
                         network access. Your privacy is absolutely protected.
                       </p>

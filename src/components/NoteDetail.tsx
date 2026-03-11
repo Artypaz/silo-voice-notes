@@ -493,9 +493,9 @@ const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo, defaultTab, 
                   }`}>
                     {segment.time}
                   </span>
-                  <p className={`text-[15px] leading-relaxed transition-colors ${
+                  <p className={`leading-relaxed transition-colors ${
                     activeSegmentIndex === i ? "text-primary" : "text-foreground"
-                  }`}>
+                  }`} style={{ fontSize: `${fontSize}px` }}>
                     {highlightText(segment.text)}
                   </p>
                 </button>

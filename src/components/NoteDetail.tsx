@@ -166,9 +166,41 @@ const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo, defaultTab, 
         <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-muted/50 transition-colors">
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
-        <span className="text-sm font-medium text-foreground">
-          {note.date} · {note.time}
-        </span>
+        <div className="flex flex-col items-center">
+          {editingTitle ? (
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onBlur={() => {
+                setEditingTitle(false);
+                onUpdateTitle?.(note.id, title);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setEditingTitle(false);
+                  onUpdateTitle?.(note.id, title);
+                }
+              }}
+              autoFocus
+              placeholder="Add title..."
+              className="text-sm font-medium text-foreground bg-transparent text-center outline-none border-b border-primary/30 focus:border-primary pb-0.5 placeholder:text-muted-foreground"
+            />
+          ) : (
+            <button
+              onClick={() => setEditingTitle(true)}
+              className="group flex flex-col items-center"
+            >
+              {title ? (
+                <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{title}</span>
+              ) : (
+                <span className="text-xs text-muted-foreground hover:text-foreground transition-colors">+ Add title</span>
+              )}
+            </button>
+          )}
+          <span className="text-[10px] text-muted-foreground font-mono mt-0.5">
+            {note.date} · {note.time}
+          </span>
+        </div>
         <div className="flex items-center gap-1">
           <button
             onClick={() => setShowSearch(!showSearch)}

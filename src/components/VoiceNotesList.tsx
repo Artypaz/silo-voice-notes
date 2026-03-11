@@ -146,7 +146,7 @@ const SwipeableNoteCard = ({
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-1">
           <span className="text-xs text-muted-foreground font-mono">
             {note.date} {note.time}
           </span>

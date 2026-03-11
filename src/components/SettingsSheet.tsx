@@ -211,7 +211,7 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                           >
                             <ArrowLeft className="w-5 h-5 text-muted-foreground" />
                           </button>
-                          <h2 className="text-lg font-semibold text-foreground">Data Management</h2>
+                          <h2 className="text-lg font-semibold text-foreground">Disk Management</h2>
                         </div>
                         <button onClick={handleClose} className="p-2 rounded-full hover:bg-muted/50 transition-colors">
                           <X className="w-5 h-5 text-muted-foreground" />

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
-import { Play, Pause, MoreHorizontal, Sparkles, Search, Trash2 } from "lucide-react";
+import { Play, Pause, MoreHorizontal, Sparkles, Search, Trash2, Loader2 } from "lucide-react";
 import NoteDetail from "./NoteDetail";
 
 export interface VoiceNote {

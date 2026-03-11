@@ -124,6 +124,31 @@ const NoteDetail = ({ note, onBack, isSummarized = false, onSeekTo }: NoteDetail
     }
   };
 
+  const cancelAddItem = () => {
+    setNewItemText("");
+    setShowAddItem(false);
+  };
+
+  const handleSegmentClick = (index: number, time: string) => {
+    setActiveSegmentIndex(index);
+    onSeekTo?.(time);
+  };
+
+  const handleSwipeEnd = (_: any, info: { offset: { x: number }; velocity: { x: number } }) => {
+    if (!isSummarized) return;
+    const threshold = 50;
+    const swipe = info.offset.x;
+    const velocity = info.velocity.x;
+
+    if (swipe < -threshold || velocity < -500) {
+      // Swiped left → go to transcript
+      if (activeTab === "summary") setActiveTab("transcript");
+    } else if (swipe > threshold || velocity > 500) {
+      // Swiped right → go to summary
+      if (activeTab === "transcript") setActiveTab("summary");
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 40 }}

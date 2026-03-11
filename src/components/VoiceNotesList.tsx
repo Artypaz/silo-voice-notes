@@ -198,10 +198,13 @@ const SwipeableNoteCard = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {summaryState === "done" ? (
-              <div className="flex items-center gap-1 text-primary">
+              <button
+                onClick={(e) => { e.stopPropagation(); onOpenSummary(note); }}
+                className="flex items-center gap-1 text-primary hover:opacity-80 transition-opacity"
+              >
                 <Sparkles className="w-3 h-3" />
                 <span className="text-[10px] font-medium">Summarized</span>
-              </div>
+              </button>
             ) : summaryState === "loading" ? (
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <Loader2 className="w-3 h-3 animate-spin text-primary" />

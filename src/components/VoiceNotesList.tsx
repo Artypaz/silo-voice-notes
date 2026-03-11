@@ -269,6 +269,8 @@ const VoiceNotesList = () => {
             onTogglePlay={(id) => setPlayingId(playingId === id ? null : id)}
             onDelete={handleDelete}
             onOpen={setSelectedNote}
+            summaryState={summaryStates[note.id] || "idle"}
+            onSummarize={handleSummarize}
           />
         ))}
       </div>

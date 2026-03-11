@@ -12,6 +12,7 @@ import {
 
 export interface VoiceNote {
   id: string;
+  title?: string;
   date: string;
   time: string;
   transcript: string;
@@ -23,6 +24,7 @@ export interface VoiceNote {
 const mockNotes: VoiceNote[] = [
   {
     id: "1",
+    title: "Morning Reflection",
     date: "2025-03-11",
     time: "14:32",
     transcript:
@@ -144,7 +146,7 @@ const SwipeableNoteCard = ({
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-1">
           <span className="text-xs text-muted-foreground font-mono">
             {note.date} {note.time}
           </span>
@@ -189,8 +191,13 @@ const SwipeableNoteCard = ({
           </DropdownMenu>
         </div>
 
+        {/* Title */}
+        {note.title && (
+          <h3 className="text-sm font-semibold text-foreground mb-1.5 truncate">{note.title}</h3>
+        )}
+
         {/* Transcript */}
-        <p className="text-sm text-foreground/90 leading-relaxed line-clamp-3 mb-3">
+        <p className="text-sm text-foreground/90 leading-relaxed line-clamp-2 mb-3">
           {note.transcript}
         </p>
 
@@ -304,6 +311,11 @@ const VoiceNotesList = () => {
     setSelectedNote(note);
   }, []);
 
+  const handleUpdateTitle = useCallback((id: string, newTitle: string) => {
+    setNotes((prev) => prev.map((n) => n.id === id ? { ...n, title: newTitle } : n));
+    setSelectedNote((prev) => prev && prev.id === id ? { ...prev, title: newTitle } : prev);
+  }, []);
+
   if (selectedNote) {
     return (
       <NoteDetail
@@ -311,6 +323,7 @@ const VoiceNotesList = () => {
         onBack={() => setSelectedNote(null)}
         isSummarized={summaryStates[selectedNote.id] === "done"}
         defaultTab={openOnSummary ? "summary" : "transcript"}
+        onUpdateTitle={handleUpdateTitle}
       />
     );
   }

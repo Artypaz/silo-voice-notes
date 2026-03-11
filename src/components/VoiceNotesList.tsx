@@ -84,6 +84,7 @@ const SwipeableNoteCard = ({
   onTogglePlay,
   onDelete,
   onOpen,
+  onOpenSummary,
   summaryState,
   onSummarize,
   onCopy,
@@ -94,6 +95,7 @@ const SwipeableNoteCard = ({
   onTogglePlay: (id: string) => void;
   onDelete: (id: string) => void;
   onOpen: (note: VoiceNote) => void;
+  onOpenSummary: (note: VoiceNote) => void;
   summaryState: "idle" | "loading" | "done";
   onSummarize: (id: string) => void;
   onCopy: (id: string) => void;

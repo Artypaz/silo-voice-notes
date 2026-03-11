@@ -363,8 +363,11 @@ const NoteDetail = ({ note, onBack, isSummarized = false }: NoteDetailProps) => 
                           autoFocus
                           className="flex-1 bg-muted/30 rounded-lg text-sm text-foreground/90 px-2 py-1 outline-none border border-primary/20 focus:border-primary/50 transition-colors placeholder:text-muted-foreground"
                         />
-                        <button onClick={addItem} className="p-1 rounded-full hover:bg-muted/50">
+                      <button onClick={addItem} className="p-1 rounded-full hover:bg-muted/50">
                           <Check className="w-3.5 h-3.5 text-primary" />
+                        </button>
+                        <button onClick={() => { setShowAddItem(false); setNewItemText(""); }} className="p-1 rounded-full hover:bg-muted/50">
+                          <X className="w-3.5 h-3.5 text-muted-foreground" />
                         </button>
                       </motion.div>
                     )}

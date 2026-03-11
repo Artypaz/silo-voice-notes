@@ -16,6 +16,7 @@ interface NoteDetailProps {
   onBack: () => void;
   isSummarized?: boolean;
   onSeekTo?: (time: string) => void;
+  defaultTab?: "transcript" | "summary";
 }
 
 const defaultSummary = {

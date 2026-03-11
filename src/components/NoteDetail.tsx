@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef } from "react";
-import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
+import { useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Play, Pause, Search, MoreVertical, Copy, Clock, FileText, Type, Sparkles, ListChecks, MessageSquareText, Pencil, Check, Plus, X, Trash2 } from "lucide-react";
 import type { VoiceNote } from "./VoiceNotesList";
 import {
@@ -43,22 +43,11 @@ const NoteDetail = ({ note, onBack, isSummarized = false }: NoteDetailProps) => 
   const [newItemText, setNewItemText] = useState("");
   const [showAddItem, setShowAddItem] = useState(false);
 
-  const [activeSegmentIndex, setActiveSegmentIndex] = useState<number | null>(null);
-  const [currentTime, setCurrentTime] = useState("00:00");
-  const containerRef = useRef<HTMLDivElement>(null);
-
   const segments = note.segments || [{ time: "0:00", text: note.transcript }];
 
   const filteredSegments = searchQuery
     ? segments.filter((s) => s.text.toLowerCase().includes(searchQuery.toLowerCase()))
     : segments;
-
-  const handleSegmentClick = (index: number, time: string) => {
-    setActiveSegmentIndex(index);
-    setCurrentTime(time);
-    setIsPlaying(true);
-    toast.success(`Skipped to ${time}`);
-  };
 
   // Search within summary
   const overviewMatchesSearch = !searchQuery || overview.toLowerCase().includes(searchQuery.toLowerCase());
@@ -182,35 +171,31 @@ const NoteDetail = ({ note, onBack, isSummarized = false }: NoteDetailProps) => 
         </div>
       </div>
 
-      {/* Swipeable tab switcher */}
+      {/* Tab switcher */}
       {isSummarized && (
-        <div className="px-4 pb-2 shrink-0">
-          <div className="relative flex items-center bg-muted/40 rounded-full p-0.5">
-            <motion.div
-              className="absolute top-0.5 bottom-0.5 rounded-full bg-primary"
-              animate={{ x: activeTab === "summary" ? 0 : "100%" }}
-              style={{ width: "calc(50% - 2px)", left: 2 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            />
-            <button
-              onClick={() => setActiveTab("summary")}
-              className={`relative z-10 flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                activeTab === "summary" ? "text-primary-foreground" : "text-muted-foreground"
-              }`}
-            >
-              <Sparkles className="w-3 h-3" />
-              Summary
-            </button>
-            <button
-              onClick={() => setActiveTab("transcript")}
-              className={`relative z-10 flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                activeTab === "transcript" ? "text-primary-foreground" : "text-muted-foreground"
-              }`}
-            >
-              <MessageSquareText className="w-3 h-3" />
-              Transcript
-            </button>
-          </div>
+        <div className="flex items-center gap-1 px-4 pb-2 shrink-0">
+          <button
+            onClick={() => setActiveTab("summary")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              activeTab === "summary"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted/50 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Sparkles className="w-3 h-3" />
+            Summary
+          </button>
+          <button
+            onClick={() => setActiveTab("transcript")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              activeTab === "transcript"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted/50 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <MessageSquareText className="w-3 h-3" />
+            Transcript
+          </button>
         </div>
       )}
 
@@ -236,28 +221,18 @@ const NoteDetail = ({ note, onBack, isSummarized = false }: NoteDetailProps) => 
         </motion.div>
       )}
 
-      {/* Content - swipeable */}
-      <div
-        ref={containerRef}
-        className="flex-1 overflow-hidden relative min-h-0"
-      >
-        <motion.div
-          className="flex h-full"
-          animate={{ x: activeTab === "summary" && isSummarized ? "0%" : "-100%" }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          drag={isSummarized ? "x" : false}
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.15}
-          onDragEnd={(_, info) => {
-            if (info.offset.x > 80) setActiveTab("summary");
-            else if (info.offset.x < -80) setActiveTab("transcript");
-          }}
-          style={{ width: "200%" }}
-        >
-          {/* Summary pane */}
-          <div className="w-1/2 h-full overflow-y-auto px-4 pb-4 scrollbar-none">
-            {isSummarized ? (
-              <div className="space-y-4 pt-2">
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-none">
+        <AnimatePresence mode="wait">
+          {activeTab === "summary" && isSummarized ? (
+            <motion.div
+              key="summary"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.15 }}
+              className="space-y-4 pt-2"
+            >
               {/* Overview */}
               {(overviewMatchesSearch || !searchQuery) && (
                 <div className="glass rounded-2xl p-4">
@@ -377,52 +352,35 @@ const NoteDetail = ({ note, onBack, isSummarized = false }: NoteDetailProps) => 
                           autoFocus
                           className="flex-1 bg-muted/30 rounded-lg text-sm text-foreground/90 px-2 py-1 outline-none border border-primary/20 focus:border-primary/50 transition-colors placeholder:text-muted-foreground"
                         />
-                      <button onClick={addItem} className="p-1 rounded-full hover:bg-muted/50">
+                        <button onClick={addItem} className="p-1 rounded-full hover:bg-muted/50">
                           <Check className="w-3.5 h-3.5 text-primary" />
-                        </button>
-                        <button onClick={() => { setShowAddItem(false); setNewItemText(""); }} className="p-1 rounded-full hover:bg-muted/50">
-                          <X className="w-3.5 h-3.5 text-muted-foreground" />
                         </button>
                       </motion.div>
                     )}
                   </div>
                 </div>
               )}
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                Summarize this note to see the summary
-              </div>
-            )}
-          </div>
-
-          {/* Transcript pane */}
-          <div className="w-1/2 h-full overflow-y-auto px-4 pb-4 scrollbar-none">
-            <div className="space-y-1 pt-2">
-              {filteredSegments.map((segment, i) => {
-                const realIndex = segments.indexOf(segment);
-                return (
-                  <button
-                    key={i}
-                    onClick={() => handleSegmentClick(realIndex, segment.time)}
-                    className={`w-full text-left rounded-xl px-3 py-2.5 transition-colors ${
-                      activeSegmentIndex === realIndex
-                        ? "bg-primary/10 border border-primary/20"
-                        : "hover:bg-muted/30"
-                    }`}
-                  >
-                    <span className="text-xs text-primary font-mono mb-1 block">{segment.time}</span>
-                    <p className={`text-[15px] leading-relaxed ${
-                      activeSegmentIndex === realIndex ? "text-primary" : "text-foreground"
-                    }`}>
-                      {highlightText(segment.text)}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </motion.div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="transcript"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.15 }}
+              className="space-y-6 pt-2"
+            >
+              {filteredSegments.map((segment, i) => (
+                <div key={i}>
+                  <span className="text-xs text-primary font-mono mb-1.5 block">{segment.time}</span>
+                  <p className="text-[15px] text-foreground leading-relaxed">
+                    {highlightText(segment.text)}
+                  </p>
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Playback bar */}
@@ -450,7 +408,7 @@ const NoteDetail = ({ note, onBack, isSummarized = false }: NoteDetailProps) => 
           </div>
 
           <span className="text-xs text-muted-foreground font-mono shrink-0">
-            {currentTime} / {note.duration}
+            00:00 / {note.duration}
           </span>
         </div>
       </div>

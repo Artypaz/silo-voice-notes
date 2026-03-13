@@ -168,6 +168,42 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                               </div>
                             }
                           />
+                          <SettingRow
+                            icon={<Play className="w-4 h-4" />}
+                            label="Auto Record on Open"
+                            trailing={
+                              <button
+                                onClick={() => setAutoRecord(!autoRecord)}
+                                className={`relative w-12 h-7 rounded-full transition-colors ${
+                                  autoRecord ? "bg-primary" : "bg-muted"
+                                }`}
+                              >
+                                <motion.div
+                                  className="absolute top-0.5 w-6 h-6 rounded-full bg-card shadow-sm"
+                                  animate={{ left: autoRecord ? 22 : 2 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                                />
+                              </button>
+                            }
+                          />
+                          <SettingRow
+                            icon={<HardDrive className="w-4 h-4" />}
+                            label="Save Audio Recording"
+                            trailing={
+                              <button
+                                onClick={() => setSaveAudio(!saveAudio)}
+                                className={`relative w-12 h-7 rounded-full transition-colors ${
+                                  saveAudio ? "bg-primary" : "bg-muted"
+                                }`}
+                              >
+                                <motion.div
+                                  className="absolute top-0.5 w-6 h-6 rounded-full bg-card shadow-sm"
+                                  animate={{ left: saveAudio ? 22 : 2 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                                />
+                              </button>
+                            }
+                          />
                         </div>
                       </div>
 

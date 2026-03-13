@@ -300,7 +300,7 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                           {(["off", "30", "90", "365"] as AutoDeleteOption[]).map((option) => (
                             <button
                               key={option}
-                              onClick={() => setAutoDelete(option)}
+                              onClick={() => updateSetting({ autoDelete: option })}
                               className="w-full"
                             >
                               <SettingRow

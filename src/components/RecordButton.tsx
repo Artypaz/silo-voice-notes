@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, Square, Pause, Play } from "lucide-react";
 import { saveNote } from "@/services/storageService";
+import { getSettings } from "@/services/settingsService";
 import { transcribeAudio } from "@/services/aiService";
 import { toast } from "sonner";
 
@@ -13,6 +14,18 @@ const RecordButton = ({ onNoteSaved }: RecordButtonProps) => {
   const [state, setState] = useState<"idle" | "recording" | "paused">("idle");
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const autoRecordTriggered = useRef(false);
+
+  // Auto-record on app open if enabled
+  useEffect(() => {
+    if (autoRecordTriggered.current) return;
+    autoRecordTriggered.current = true;
+    const { autoRecord } = getSettings();
+    if (autoRecord && state === "idle") {
+      setState("recording");
+      setElapsed(0);
+    }
+  }, []);
 
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60);
@@ -57,7 +70,8 @@ const RecordButton = ({ onNoteSaved }: RecordButtonProps) => {
 
     const now = new Date();
     const noteId = crypto.randomUUID();
-    const audioPath = `local://recordings/${noteId}.m4a`;
+    const { saveAudio } = getSettings();
+    const audioPath = saveAudio ? `local://recordings/${noteId}.m4a` : "";
 
     // Mock transcription
     const rawTranscript = await transcribeAudio(audioPath);

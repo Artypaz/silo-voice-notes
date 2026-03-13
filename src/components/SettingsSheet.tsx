@@ -1,6 +1,7 @@
 import { X, Globe, Moon, Sun, Mic, Shield, Database, ChevronRight, ArrowLeft, Trash2, Clock, HardDrive, FileText, Play, Activity } from "lucide-react";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { getSettings, updateSettings } from "@/services/settingsService";
 
 interface SettingsSheetProps {
   open: boolean;
@@ -28,16 +29,23 @@ const mockRecordings: MockRecording[] = [
 const SWIPE_THRESHOLD = 80;
 
 const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
+  const [settings, setSettings] = useState(() => getSettings());
   const [darkMode, setDarkMode] = useState(
     document.documentElement.classList.contains("dark")
   );
   const [view, setView] = useState<"main" | "data" | "memory">("main");
-  const [autoDelete, setAutoDelete] = useState<AutoDeleteOption>("off");
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [keepTranscription, setKeepTranscription] = useState(true);
   const [storageFilter, setStorageFilter] = useState<StorageFilter>("all");
-  const [autoRecord, setAutoRecord] = useState(false);
-  const [saveAudio, setSaveAudio] = useState(true);
+
+  // Sync settings from localStorage when sheet opens
+  useEffect(() => {
+    if (open) setSettings(getSettings());
+  }, [open]);
+
+  const updateSetting = useCallback((updates: Partial<typeof settings>) => {
+    const next = updateSettings(updates);
+    setSettings(next);
+  }, []);
 
   // Swipe-back gesture
   const dragX = useMotionValue(0);
@@ -173,14 +181,14 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                             label="Auto Record on Open"
                             trailing={
                               <button
-                                onClick={() => setAutoRecord(!autoRecord)}
+                                onClick={() => updateSetting({ autoRecord: !settings.autoRecord })}
                                 className={`relative w-12 h-7 rounded-full transition-colors ${
-                                  autoRecord ? "bg-primary" : "bg-muted"
+                                  settings.autoRecord ? "bg-primary" : "bg-muted"
                                 }`}
                               >
                                 <motion.div
                                   className="absolute top-0.5 w-6 h-6 rounded-full bg-card shadow-sm"
-                                  animate={{ left: autoRecord ? 22 : 2 }}
+                                  animate={{ left: settings.autoRecord ? 22 : 2 }}
                                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
                                 />
                               </button>
@@ -191,14 +199,14 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                             label="Save Audio Recording"
                             trailing={
                               <button
-                                onClick={() => setSaveAudio(!saveAudio)}
+                                onClick={() => updateSetting({ saveAudio: !settings.saveAudio })}
                                 className={`relative w-12 h-7 rounded-full transition-colors ${
-                                  saveAudio ? "bg-primary" : "bg-muted"
+                                  settings.saveAudio ? "bg-primary" : "bg-muted"
                                 }`}
                               >
                                 <motion.div
                                   className="absolute top-0.5 w-6 h-6 rounded-full bg-card shadow-sm"
-                                  animate={{ left: saveAudio ? 22 : 2 }}
+                                  animate={{ left: settings.saveAudio ? 22 : 2 }}
                                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
                                 />
                               </button>
@@ -292,7 +300,7 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                           {(["off", "30", "90", "365"] as AutoDeleteOption[]).map((option) => (
                             <button
                               key={option}
-                              onClick={() => setAutoDelete(option)}
+                              onClick={() => updateSetting({ autoDelete: option })}
                               className="w-full"
                             >
                               <SettingRow
@@ -301,12 +309,12 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                                 trailing={
                                   <div
                                     className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                                      autoDelete === option
+                                      settings.autoDelete === option
                                         ? "border-primary bg-primary"
                                         : "border-muted-foreground/40"
                                     }`}
                                   >
-                                    {autoDelete === option && (
+                                    {settings.autoDelete === option && (
                                       <div className="w-2 h-2 rounded-full bg-primary-foreground" />
                                     )}
                                   </div>
@@ -413,14 +421,14 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                           <p className="text-xs text-muted-foreground">Only delete audio files, keep text</p>
                         </div>
                         <button
-                          onClick={() => setKeepTranscription(!keepTranscription)}
+                          onClick={() => updateSetting({ keepTranscription: !settings.keepTranscription })}
                           className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${
-                            keepTranscription ? "bg-primary" : "bg-muted"
+                            settings.keepTranscription ? "bg-primary" : "bg-muted"
                           }`}
                         >
                           <motion.div
                             className="absolute top-0.5 w-6 h-6 rounded-full bg-card shadow-sm"
-                            animate={{ left: keepTranscription ? 22 : 2 }}
+                            animate={{ left: settings.keepTranscription ? 22 : 2 }}
                             transition={{ type: "spring", stiffness: 400, damping: 25 }}
                           />
                         </button>

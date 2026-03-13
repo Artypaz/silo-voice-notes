@@ -36,6 +36,8 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [keepTranscription, setKeepTranscription] = useState(true);
   const [storageFilter, setStorageFilter] = useState<StorageFilter>("all");
+  const [autoRecord, setAutoRecord] = useState(false);
+  const [saveAudio, setSaveAudio] = useState(true);
 
   // Swipe-back gesture
   const dragX = useMotionValue(0);

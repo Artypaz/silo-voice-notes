@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, Square, Pause, Play } from "lucide-react";
 import { saveNote } from "@/services/storageService";
+import { getSettings } from "@/services/settingsService";
 import { transcribeAudio } from "@/services/aiService";
 import { toast } from "sonner";
 

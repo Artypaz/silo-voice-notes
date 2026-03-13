@@ -87,7 +87,7 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
             transition={{ type: "spring", damping: 28, stiffness: 300 }}
             className="fixed bottom-0 left-0 right-0 z-50 max-w-[430px] mx-auto"
           >
-            <div className="glass-strong rounded-t-3xl px-5 pt-3 pb-8 safe-bottom max-h-[90dvh] min-h-[60dvh] flex flex-col">
+            <div className="glass-strong rounded-t-3xl px-5 pt-3 pb-8 safe-bottom max-h-[90dvh] min-h-[75dvh] flex flex-col">
               {/* Handle */}
               <div className="flex justify-center mb-4 shrink-0">
                 <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />

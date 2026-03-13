@@ -314,7 +314,7 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                                         : "border-muted-foreground/40"
                                     }`}
                                   >
-                                    {autoDelete === option && (
+                                    {settings.autoDelete === option && (
                                       <div className="w-2 h-2 rounded-full bg-primary-foreground" />
                                     )}
                                   </div>

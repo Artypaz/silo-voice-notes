@@ -14,6 +14,18 @@ const RecordButton = ({ onNoteSaved }: RecordButtonProps) => {
   const [state, setState] = useState<"idle" | "recording" | "paused">("idle");
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const autoRecordTriggered = useRef(false);
+
+  // Auto-record on app open if enabled
+  useEffect(() => {
+    if (autoRecordTriggered.current) return;
+    autoRecordTriggered.current = true;
+    const { autoRecord } = getSettings();
+    if (autoRecord && state === "idle") {
+      setState("recording");
+      setElapsed(0);
+    }
+  }, []);
 
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60);

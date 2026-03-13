@@ -1,6 +1,7 @@
 import { X, Globe, Moon, Sun, Mic, Shield, Database, ChevronRight, ArrowLeft, Trash2, Clock, HardDrive, FileText, Play, Activity } from "lucide-react";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { getSettings, updateSettings } from "@/services/settingsService";
 
 interface SettingsSheetProps {
   open: boolean;

@@ -29,16 +29,23 @@ const mockRecordings: MockRecording[] = [
 const SWIPE_THRESHOLD = 80;
 
 const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
+  const [settings, setSettings] = useState(() => getSettings());
   const [darkMode, setDarkMode] = useState(
     document.documentElement.classList.contains("dark")
   );
   const [view, setView] = useState<"main" | "data" | "memory">("main");
-  const [autoDelete, setAutoDelete] = useState<AutoDeleteOption>("off");
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [keepTranscription, setKeepTranscription] = useState(true);
   const [storageFilter, setStorageFilter] = useState<StorageFilter>("all");
-  const [autoRecord, setAutoRecord] = useState(false);
-  const [saveAudio, setSaveAudio] = useState(true);
+
+  // Sync settings from localStorage when sheet opens
+  useEffect(() => {
+    if (open) setSettings(getSettings());
+  }, [open]);
+
+  const updateSetting = useCallback((updates: Partial<typeof settings>) => {
+    const next = updateSettings(updates);
+    setSettings(next);
+  }, []);
 
   // Swipe-back gesture
   const dragX = useMotionValue(0);

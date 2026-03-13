@@ -181,9 +181,9 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                             label="Auto Record on Open"
                             trailing={
                               <button
-                                onClick={() => setAutoRecord(!autoRecord)}
+                                onClick={() => updateSetting({ autoRecord: !settings.autoRecord })}
                                 className={`relative w-12 h-7 rounded-full transition-colors ${
-                                  autoRecord ? "bg-primary" : "bg-muted"
+                                  settings.autoRecord ? "bg-primary" : "bg-muted"
                                 }`}
                               >
                                 <motion.div

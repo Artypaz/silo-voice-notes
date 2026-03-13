@@ -30,7 +30,7 @@ const BottomTabBar = ({ activeTab, onTabChange }: BottomTabBarProps) => {
             >
               {isRecord ? (
                 <motion.div
-                  className={`relative flex items-center justify-center w-14 h-14 -mt-3 rounded-full ${
+                  className={`relative flex items-center justify-center w-14 h-14 -mt-2 rounded-full ${
                     isActive ? "bg-primary glow-primary" : "bg-muted"
                   }`}
                   whileTap={{ scale: 0.92 }}

@@ -421,9 +421,9 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                           <p className="text-xs text-muted-foreground">Only delete audio files, keep text</p>
                         </div>
                         <button
-                          onClick={() => setKeepTranscription(!keepTranscription)}
+                          onClick={() => updateSetting({ keepTranscription: !settings.keepTranscription })}
                           className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${
-                            keepTranscription ? "bg-primary" : "bg-muted"
+                            settings.keepTranscription ? "bg-primary" : "bg-muted"
                           }`}
                         >
                           <motion.div

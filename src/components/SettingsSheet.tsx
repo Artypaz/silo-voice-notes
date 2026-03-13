@@ -309,7 +309,7 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                                 trailing={
                                   <div
                                     className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                                      autoDelete === option
+                                      settings.autoDelete === option
                                         ? "border-primary bg-primary"
                                         : "border-muted-foreground/40"
                                     }`}

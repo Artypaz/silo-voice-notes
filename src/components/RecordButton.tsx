@@ -70,7 +70,8 @@ const RecordButton = ({ onNoteSaved }: RecordButtonProps) => {
 
     const now = new Date();
     const noteId = crypto.randomUUID();
-    const audioPath = `local://recordings/${noteId}.m4a`;
+    const { saveAudio } = getSettings();
+    const audioPath = saveAudio ? `local://recordings/${noteId}.m4a` : "";
 
     // Mock transcription
     const rawTranscript = await transcribeAudio(audioPath);

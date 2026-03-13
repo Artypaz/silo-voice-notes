@@ -428,7 +428,7 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                         >
                           <motion.div
                             className="absolute top-0.5 w-6 h-6 rounded-full bg-card shadow-sm"
-                            animate={{ left: keepTranscription ? 22 : 2 }}
+                            animate={{ left: settings.keepTranscription ? 22 : 2 }}
                             transition={{ type: "spring", stiffness: 400, damping: 25 }}
                           />
                         </button>

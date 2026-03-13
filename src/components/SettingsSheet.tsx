@@ -199,9 +199,9 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                             label="Save Audio Recording"
                             trailing={
                               <button
-                                onClick={() => setSaveAudio(!saveAudio)}
+                                onClick={() => updateSetting({ saveAudio: !settings.saveAudio })}
                                 className={`relative w-12 h-7 rounded-full transition-colors ${
-                                  saveAudio ? "bg-primary" : "bg-muted"
+                                  settings.saveAudio ? "bg-primary" : "bg-muted"
                                 }`}
                               >
                                 <motion.div

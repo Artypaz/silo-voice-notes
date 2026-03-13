@@ -36,6 +36,8 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [keepTranscription, setKeepTranscription] = useState(true);
   const [storageFilter, setStorageFilter] = useState<StorageFilter>("all");
+  const [autoRecord, setAutoRecord] = useState(false);
+  const [saveAudio, setSaveAudio] = useState(true);
 
   // Swipe-back gesture
   const dragX = useMotionValue(0);
@@ -164,6 +166,42 @@ const SettingsSheet = ({ open, onClose }: SettingsSheetProps) => {
                                 <span className="text-sm">Accurate</span>
                                 <ChevronRight className="w-4 h-4" />
                               </div>
+                            }
+                          />
+                          <SettingRow
+                            icon={<Play className="w-4 h-4" />}
+                            label="Auto Record on Open"
+                            trailing={
+                              <button
+                                onClick={() => setAutoRecord(!autoRecord)}
+                                className={`relative w-12 h-7 rounded-full transition-colors ${
+                                  autoRecord ? "bg-primary" : "bg-muted"
+                                }`}
+                              >
+                                <motion.div
+                                  className="absolute top-0.5 w-6 h-6 rounded-full bg-card shadow-sm"
+                                  animate={{ left: autoRecord ? 22 : 2 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                                />
+                              </button>
+                            }
+                          />
+                          <SettingRow
+                            icon={<HardDrive className="w-4 h-4" />}
+                            label="Save Audio Recording"
+                            trailing={
+                              <button
+                                onClick={() => setSaveAudio(!saveAudio)}
+                                className={`relative w-12 h-7 rounded-full transition-colors ${
+                                  saveAudio ? "bg-primary" : "bg-muted"
+                                }`}
+                              >
+                                <motion.div
+                                  className="absolute top-0.5 w-6 h-6 rounded-full bg-card shadow-sm"
+                                  animate={{ left: saveAudio ? 22 : 2 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                                />
+                              </button>
                             }
                           />
                         </div>
